@@ -10,16 +10,12 @@ function MainPage() {
     const navigate = useNavigate();
 
     function moveCamp(camp) {
-        navigate(`/${camp}`);
+        navigate(`/camp/${camp}`);
     }
     return (
         <div>
-            {/*<Link to="/A">*/}
-                <Button onClick={() => moveCamp("A")}>2023-1 A camp</Button>
-            {/*</Link>*/}
-            {/*<Link to="/B">*/}
-                <Button onClick={() => moveCamp("B")}>2023-1 B camp</Button>
-            {/*</Link>*/}
+            <Button onClick={() => moveCamp("A")}>2023-1 A camp</Button>
+            <Button onClick={() => moveCamp("B")}>2023-1 B camp</Button>
         </div>
     );
 }

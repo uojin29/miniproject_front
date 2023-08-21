@@ -8,7 +8,7 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<MainPage />} />
-                <Route path="/:camp" element={<DetailPage />} /> {/* DetailPage로 수정 */}
+                <Route path="/camp/:camp" element={<DetailPage />} /> {/* DetailPage로 수정 */}
             </Routes>
         </Router>
     );
