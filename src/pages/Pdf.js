@@ -16,7 +16,7 @@ const Pdf = ({ name, studentId, department, campName, startDate, finishDate, fon
             flexGrow: 1,
         },
         text: {
-            fontSize: 12, // 폰트 사이즈 지정
+            fontSize: 12,
         },
     });
 

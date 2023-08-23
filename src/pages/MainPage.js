@@ -1,9 +1,6 @@
 import React, { useState } from "react";
-import { DataGrid } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
-import {Link} from "@mui/material";
 import {useNavigate} from "react-router-dom";
-// import '../styles/Detail.css';
 
 
 function MainPage() {
