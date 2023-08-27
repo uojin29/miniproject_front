@@ -1,0 +1,7 @@
+.custom-modal {
+    max-width: 500px; /* 원하는 모달 너비 설정 */
+}
+
+.custom-modal .MuiDialogContent-root {
+    padding: 20px; /* 내부 간격 설정 */
+}

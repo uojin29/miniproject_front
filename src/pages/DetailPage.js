@@ -8,32 +8,36 @@ import {PDFDownloadLink} from '@react-pdf/renderer'
 import myFont from '../fonts/NanumMyeongjo.otf';
 import Pdf from "./Pdf";
 import axios from "axios";
+import StudentAdd from "../component/StudentAdd";
+import StudentEdit from "../component/StudentEdit";
+import Typography from "@mui/material/Typography";
 
-const handlePdfView = (name, studentId, department, campName, startDate, finishDate) => {
+const handlePdfView = (name, studentId, department, campName) => {
     console.log("View PDF:", name);
-    const pdfBlob = <Pdf
-        name={name}
-        studentId={studentId}
-        department={department}
-        campName={campName}
-        startDate={startDate}
-        finishDate={finishDate}
-    />;
-    const pdfContent = renderToString(pdfBlob);
-    const newWindow = window.open("", name);
-    newWindow.document.write(pdfContent);
+    // const pdfBlob = <Pdf
+    //     name={name}
+    //     studentId={studentId}
+    //     department={department}
+    //     campName={campName}
+    // />;
+    // const pdfContent = renderToString(pdfBlob);
+    // const newWindow = window.open("", name);
+    // newWindow.document.write(pdfContent);
+};
+
+const handleDownloadClick = (name, campName, studentId) => {
+    const currentTime = new Date().toLocaleString();
+    console.log(currentTime, name, campName, studentId, "다운로드 됨");
 };
 
 const columns = [
-    { field: 'name', headerName: '이름'},
-    { field: 'studentId', headerName: '학번'},
-    { field: 'department', headerName: '학부'},
-    { field: 'campName', headerName: '캠프이름' },
-    { field: 'startDate', headerName: '시작일'},
-    { field: 'finishDate', headerName: '마감일' },
+    { field: 'name', headerName: '이름', width: 150},
+    { field: 'studentId', headerName: '학번', width: 150},
+    { field: 'department', headerName: '학부', width: 150},
+    { field: 'campName', headerName: '캠프이름', width: 150},
     {
         field: "pdfView",
-        headerName: "pdf 미리보기",
+        headerName: "수료증 미리보기",
         sortable: false,
         width: 150,
         renderCell: (params) => (
@@ -42,13 +46,13 @@ const columns = [
                 onClick={() => handlePdfView(params.row.name, params.row.studentId, params.row.department, params.row.campName, params.row.startDate, params.row.finishDate)}
                 sx={{ color: 'lightgrey', border: 'none', background: 'grey' }}
             >
-                PDF 미리보기
+                수료증 미리보기
             </Button>
         ),
     },
     {
         field: "pdfDownload",
-        headerName: "pdf 다운로드",
+        headerName: "수료증 다운로드",
         sortable: false,
         width: 150,
         renderCell: (params) => (
@@ -57,8 +61,6 @@ const columns = [
                                studentId={params.row.studentId}
                                department={params.row.department}
                                campName={params.row.campName}
-                               startDate={params.row.startDate}
-                               finishDate={params.row.finishDate}
                                font={myFont}/>}
                 fileName={`${params.row.campName}_${params.row.studentId}_${params.row.name}.pdf`}
             >
@@ -73,8 +75,9 @@ const columns = [
                                 background: 'darkgrey', // 변경 가능한 부분
                             },
                         }}
+                        onClick={() => handleDownloadClick(params.row.campName, params.row.studentId, params.row.name)}
                     >
-                        {loading ? '로딩 중...' : 'PDF 다운로드'}
+                        {loading ? '로딩 중...' : '수료증 다운로드'}
                     </Button>
                 )}
             </PDFDownloadLink>
@@ -87,15 +90,30 @@ columns.forEach(column => {
 });
 
 function DetailPage() {
-    const { camp } = useParams();
+    const { campName } = useParams();
     const [filteredRows, setFilteredRows] = useState([]);
     const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
+    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+
+    const showAddModal = () => {
+        setAddModalOpen(true);
+    };
+
+    const showEditModal = () => {
+        if (rowSelectionModel.length === 1) {
+            setEditModalOpen(true);
+        } else {
+            alert("하나의 항목만 선택해주세요."); // 선택된 데이터가 1개가 아닐 때 알림 메시지
+        }
+    };
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.post(`/camp/${camp}`);
-                console.log("Response data:", response.data);
+                const response = await axios.post(`/student/${campName}`);
+                // console.log("campName:", campName);
+                // console.log("Response data:", response.data);
                 const data = response.data;
                 setFilteredRows(data);
             } catch (error) {
@@ -103,52 +121,67 @@ function DetailPage() {
             }
         }
         fetchData();
-    }, [camp]);
+    }, [campName]);
 
-    async function deleteMenu(ids) {
+    async function deleteStudent(ids) {
         try {
             for (const id of ids) {
                 console.log("id: ", id);
-                await axios.delete(`http://localhost:8080/camp/${id}`);
+                await axios.delete(`/student/${id}`);
             }
-            alert("선택한 메뉴를 삭제하셨습니다!");
+            alert("선택한 학생 정보를 삭제하셨습니다!");
             window.location.reload();
         } catch (error) {
             console.error("Error deleting menu:", error);
-            alert("메뉴 삭제 중 오류가 발생했습니다.");
+            alert("학생 정보 삭제 중 오류가 발생했습니다.");
         }
     }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '70%', marginTop: '100px' }}>
-                <DataGrid
-                    rows={filteredRows}
-                    columns={columns}
-                    checkboxSelection
-                    className="custom-data-grid"
-                    hideFooter
-                    onRowSelectionModelChange={(newRowSelectionModel) => {
-                        setRowSelectionModel(newRowSelectionModel);
-                        console.log("select row: ", newRowSelectionModel);
-                    }}
-                    rowSelectionModel={rowSelectionModel}
-                />
-            </div>
-            <div style={{justifyContent: 'flex-end'}}>
-                <Button
-                    variant="outlined"
-                    sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
-                >
-                    수정
-                </Button>
-                <Button
-                    variant="outlined"
-                    sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
-                    onClick={() => deleteMenu([...rowSelectionModel])}
-                >
-                    삭제
-                </Button>
+            <div style={{width: '70%'}}>
+                <div style={{ marginTop: '100px' }}>
+                    <Typography variant="h6" style={{marginBottom: '10px'}}>
+                        {campName} 캠프 수강생 명단
+                    </Typography>
+                    <DataGrid
+                        rows={filteredRows}
+                        columns={columns}
+                        checkboxSelection
+                        className="custom-data-grid"
+                        hideFooter
+                        onRowSelectionModelChange={(newRowSelectionModel) => {
+                            setRowSelectionModel(newRowSelectionModel);
+                            console.log("select row: ", newRowSelectionModel);
+                        }}
+                        rowSelectionModel={rowSelectionModel}
+                    />
+                </div>
+                <div style={{justifyContent: 'flex-end', display: 'flex', gap: '10px', marginTop: '10px'}}>
+                    <Button
+                        variant="outlined"
+                        sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                        onClick={showAddModal}
+                    >
+                        추가
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                        onClick={showEditModal}
+                    >
+                        수정
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                        onClick={() => deleteStudent([...rowSelectionModel])}
+                    >
+                        삭제
+                    </Button>
+                </div>
+                {addModalOpen && <div className={"modal"}> <StudentAdd setModalOpen={setAddModalOpen} campName={campName}/></div>}
+                {editModalOpen && <div className={"modal"}> <StudentEdit setModalOpen={setEditModalOpen} campName={campName} rowSelectionModel={rowSelectionModel}/></div>}
             </div>
         </div>
     );
