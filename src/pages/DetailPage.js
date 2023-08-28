@@ -2,99 +2,105 @@ import React, { useState, useEffect } from "react";
 import { DataGrid } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
 import '../styles/Detail.css';
-import { useParams } from "react-router-dom";
-import {renderToString} from "react-dom/server";
+import {useLocation, useParams} from "react-router-dom";
 import {PDFDownloadLink} from '@react-pdf/renderer'
-import myFont from '../fonts/NanumMyeongjo.otf';
+import myFont from '../fonts/NotoSerifKR-Medium.otf';
 import Pdf from "./Pdf";
 import axios from "axios";
 import StudentAdd from "../component/StudentAdd";
 import StudentEdit from "../component/StudentEdit";
 import Typography from "@mui/material/Typography";
-
-const handlePdfView = (name, studentId, department, campName) => {
-    console.log("View PDF:", name);
-    // const pdfBlob = <Pdf
-    //     name={name}
-    //     studentId={studentId}
-    //     department={department}
-    //     campName={campName}
-    // />;
-    // const pdfContent = renderToString(pdfBlob);
-    // const newWindow = window.open("", name);
-    // newWindow.document.write(pdfContent);
-};
-
-const handleDownloadClick = (name, campName, studentId) => {
-    const currentTime = new Date().toLocaleString();
-    console.log(currentTime, name, campName, studentId, "다운로드 됨");
-};
-
-const columns = [
-    { field: 'name', headerName: '이름', width: 150},
-    { field: 'studentId', headerName: '학번', width: 150},
-    { field: 'department', headerName: '학부', width: 150},
-    { field: 'campName', headerName: '캠프이름', width: 150},
-    {
-        field: "pdfView",
-        headerName: "수료증 미리보기",
-        sortable: false,
-        width: 150,
-        renderCell: (params) => (
-            <Button
-                variant="outlined"
-                onClick={() => handlePdfView(params.row.name, params.row.studentId, params.row.department, params.row.campName, params.row.startDate, params.row.finishDate)}
-                sx={{ color: 'lightgrey', border: 'none', background: 'grey' }}
-            >
-                수료증 미리보기
-            </Button>
-        ),
-    },
-    {
-        field: "pdfDownload",
-        headerName: "수료증 다운로드",
-        sortable: false,
-        width: 150,
-        renderCell: (params) => (
-            <PDFDownloadLink
-                document={<Pdf name={params.row.name}
-                               studentId={params.row.studentId}
-                               department={params.row.department}
-                               campName={params.row.campName}
-                               font={myFont}/>}
-                fileName={`${params.row.campName}_${params.row.studentId}_${params.row.name}.pdf`}
-            >
-                {({ loading }) => (
-                    <Button
-                        variant="outlined"
-                        sx={{
-                            color: 'lightgrey',
-                            border: 'none',
-                            background: 'grey',
-                            '&:hover': {
-                                background: 'darkgrey', // 변경 가능한 부분
-                            },
-                        }}
-                        onClick={() => handleDownloadClick(params.row.campName, params.row.studentId, params.row.name)}
-                    >
-                        {loading ? '로딩 중...' : '수료증 다운로드'}
-                    </Button>
-                )}
-            </PDFDownloadLink>
-        ),
-    },
-];
-columns.forEach(column => {
-    column.align = 'center';
-    column.headerAlign = 'center';
-});
+import { PDFViewer } from '@react-pdf/renderer';
 
 function DetailPage() {
     const { campName } = useParams();
+    const [pdfVisible, setPdfVisible] = useState(false);
+    const [pdfData, setPdfData] = useState([]);
     const [filteredRows, setFilteredRows] = useState([]);
     const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
     const [addModalOpen, setAddModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
+    const location = useLocation();
+    const startDate = location.state.startDate;
+    const finishDate = location.state.finishDate;
+
+    const columns = [
+        { field: 'name', headerName: '이름', width: 150},
+        { field: 'studentId', headerName: '학번', width: 150},
+        { field: 'department', headerName: '학부', width: 150},
+        { field: 'campName', headerName: '캠프이름', width: 150},
+        {
+            field: "pdfView",
+            headerName: "수료증 미리보기",
+            sortable: false,
+            width: 150,
+            renderCell: (params) => (
+                <Button
+                    variant="outlined"
+                    onClick={() => handlePdfView(params.row.name, params.row.studentId, params.row.department, params.row.campName)}
+                    sx={{ color: 'lightgrey', border: 'none', background: 'grey' }}
+                >
+                    수료증 미리보기
+                </Button>
+            ),
+        },
+        {
+            field: "pdfDownload",
+            headerName: "수료증 다운로드",
+            sortable: false,
+            width: 150,
+            renderCell: (params) => (
+                <PDFDownloadLink
+                    document={<Pdf name={params.row.name}
+                                   studentId={params.row.studentId}
+                                   department={params.row.department}
+                                   campName={params.row.campName}
+                                   startDate={startDate}
+                                   finishDate={finishDate}
+                                   font={myFont}/>}
+                    fileName={`${params.row.campName}_${params.row.studentId}_${params.row.name}.pdf`}
+                >
+                    {({ loading }) => (
+                        <Button
+                            variant="outlined"
+                            sx={{
+                                color: 'lightgrey',
+                                border: 'none',
+                                background: 'grey',
+                                '&:hover': {
+                                    background: 'darkgrey', // 변경 가능한 부분
+                                },
+                            }}
+                            onClick={() => handleDownloadClick(params.row.campName, params.row.studentId, params.row.name)}
+                        >
+                            {loading ? '로딩 중...' : '수료증 다운로드'}
+                        </Button>
+                    )}
+                </PDFDownloadLink>
+            ),
+        },
+    ];
+    columns.forEach(column => {
+        column.align = 'center';
+        column.headerAlign = 'center';
+    });
+
+    const handlePdfView = (name, studentId, department, campName) => {
+        console.log("View PDF:", name);
+        setPdfVisible(true);
+        const pdfData = {
+            name: name,
+            studentId: studentId,
+            department: department,
+            campName: campName
+        };
+        setPdfData(pdfData);
+    };
+
+    const handleDownloadClick = (name, campName, studentId) => {
+        const currentTime = new Date().toLocaleString();
+        console.log(currentTime, name, campName, studentId, "다운로드 됨");
+    };
 
     const showAddModal = () => {
         setAddModalOpen(true);
@@ -144,6 +150,9 @@ function DetailPage() {
                     <Typography variant="h6" style={{marginBottom: '10px'}}>
                         {campName} 캠프 수강생 명단
                     </Typography>
+                    <Typography>
+                        캠프 기간: {startDate} - {finishDate} {/* startDate와 finishDate를 보여주기 */}
+                    </Typography>
                     <DataGrid
                         rows={filteredRows}
                         columns={columns}
@@ -182,9 +191,18 @@ function DetailPage() {
                 </div>
                 {addModalOpen && <div className={"modal"}> <StudentAdd setModalOpen={setAddModalOpen} campName={campName}/></div>}
                 {editModalOpen && <div className={"modal"}> <StudentEdit setModalOpen={setEditModalOpen} campName={campName} rowSelectionModel={rowSelectionModel}/></div>}
+                {pdfVisible && (
+                    <PDFViewer style={{ width: '100%', height: '500px' }}>
+                        <Pdf
+                            name={pdfData.name}
+                            studentId={pdfData.studentId}
+                            department={pdfData.department}
+                            campName={pdfData.campName}
+                        />
+                    </PDFViewer>
+                )}
             </div>
         </div>
     );
 }
-
 export default DetailPage;

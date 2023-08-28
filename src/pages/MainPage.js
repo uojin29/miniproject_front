@@ -26,8 +26,10 @@ function MainPage() {
 
     const navigate = useNavigate();
 
-    function moveCamp(campName) {
-        navigate(`/${campName}`);
+    function moveCamp(campName, startDate, finishDate) {
+        navigate(`/${campName}`, {
+            state: { startDate, finishDate } // 캠프 시작일과 종료일을 state로 전달
+        });
     }
 
     const showAddModal = () => {
@@ -75,7 +77,7 @@ function MainPage() {
                                 <Button
                                     variant="outlined"
                                     sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
-                                    onClick={() => moveCamp(camp.campName)}>
+                                    onClick={() => moveCamp(camp.campName, camp.startDate, camp.finishDate)}>
                                     상세보기
                                 </Button>
                                 <Button
