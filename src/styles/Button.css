@@ -1,0 +1,10 @@
+.button {
+    color: lightgrey;
+    border: none;
+    background: grey;
+}
+
+.button:hover {
+    border-color: grey;
+    color: grey;
+}

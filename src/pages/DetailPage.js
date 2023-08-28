@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DataGrid } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
 import '../styles/Detail.css';
+import '../styles/Button.css';
 import {useLocation, useParams} from "react-router-dom";
 import {PDFDownloadLink} from '@react-pdf/renderer'
 import myFont from '../fonts/NotoSerifKR-Medium.otf';
@@ -23,22 +24,34 @@ function DetailPage() {
     const location = useLocation();
     const startDate = location.state.startDate;
     const finishDate = location.state.finishDate;
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1; // 월은 0부터 시작하므로 1을 더함
+    const day = currentDate.getDate();
 
     const columns = [
-        { field: 'name', headerName: '이름', width: 150},
-        { field: 'studentId', headerName: '학번', width: 150},
-        { field: 'department', headerName: '학부', width: 150},
-        { field: 'campName', headerName: '캠프이름', width: 150},
+        { field: 'name', headerName: '이름'},
+        { field: 'studentId', headerName: '학번'},
+        { field: 'department', headerName: '학부'},
+        { field: 'campName', headerName: '캠프이름'},
         {
             field: "pdfView",
             headerName: "수료증 미리보기",
             sortable: false,
-            width: 150,
             renderCell: (params) => (
                 <Button
                     variant="outlined"
                     onClick={() => handlePdfView(params.row.name, params.row.studentId, params.row.department, params.row.campName)}
-                    sx={{ color: 'lightgrey', border: 'none', background: 'grey' }}
+                    sx={{
+                        color: 'lightgrey',
+                        border: 'none',
+                        background: 'grey',
+                        '&:hover': {
+                            background: 'lightgrey',
+                            border: 'none',
+                            color: 'grey'// 변경 가능한 부분
+                        },
+                    }}
                 >
                     수료증 미리보기
                 </Button>
@@ -48,7 +61,6 @@ function DetailPage() {
             field: "pdfDownload",
             headerName: "수료증 다운로드",
             sortable: false,
-            width: 150,
             renderCell: (params) => (
                 <PDFDownloadLink
                     document={<Pdf name={params.row.name}
@@ -57,7 +69,10 @@ function DetailPage() {
                                    campName={params.row.campName}
                                    startDate={startDate}
                                    finishDate={finishDate}
-                                   font={myFont}/>}
+                                   font={myFont}
+                                   year={year}
+                                   month={month}
+                                   day={day}/>}
                     fileName={`${params.row.campName}_${params.row.studentId}_${params.row.name}.pdf`}
                 >
                     {({ loading }) => (
@@ -68,7 +83,9 @@ function DetailPage() {
                                 border: 'none',
                                 background: 'grey',
                                 '&:hover': {
-                                    background: 'darkgrey', // 변경 가능한 부분
+                                    background: 'lightgrey',
+                                    border: 'none',
+                                    color: 'grey'// 변경 가능한 부분
                                 },
                             }}
                             onClick={() => handleDownloadClick(params.row.campName, params.row.studentId, params.row.name)}
@@ -83,18 +100,28 @@ function DetailPage() {
     columns.forEach(column => {
         column.align = 'center';
         column.headerAlign = 'center';
+        column.flex = 1; // flex 속성 설정
     });
+
 
     const handlePdfView = (name, studentId, department, campName) => {
         console.log("View PDF:", name);
+
         setPdfVisible(true);
         const pdfData = {
             name: name,
             studentId: studentId,
             department: department,
-            campName: campName
+            campName: campName,
+            year: year,
+            month: month,
+            day: day,
         };
         setPdfData(pdfData);
+    };
+
+    const handleClosePdfView = () => {
+        setPdfVisible(false);
     };
 
     const handleDownloadClick = (name, campName, studentId) => {
@@ -169,21 +196,48 @@ function DetailPage() {
                 <div style={{justifyContent: 'flex-end', display: 'flex', gap: '10px', marginTop: '10px'}}>
                     <Button
                         variant="outlined"
-                        sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                        sx={{
+                            color: 'lightgrey',
+                            border: 'none',
+                            background: 'grey',
+                            '&:hover': {
+                                background: 'lightgrey',
+                                border: 'none',
+                                color: 'grey'// 변경 가능한 부분
+                            },
+                        }}
                         onClick={showAddModal}
                     >
                         추가
                     </Button>
                     <Button
                         variant="outlined"
-                        sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                        sx={{
+                            color: 'lightgrey',
+                            border: 'none',
+                            background: 'grey',
+                            '&:hover': {
+                                background: 'lightgrey',
+                                border: 'none',
+                                color: 'grey'// 변경 가능한 부분
+                            },
+                        }}
                         onClick={showEditModal}
                     >
                         수정
                     </Button>
                     <Button
                         variant="outlined"
-                        sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                        sx={{
+                            color: 'lightgrey',
+                            border: 'none',
+                            background: 'grey',
+                            '&:hover': {
+                                background: 'lightgrey',
+                                border: 'none',
+                                color: 'grey'// 변경 가능한 부분
+                            },
+                        }}
                         onClick={() => deleteStudent([...rowSelectionModel])}
                     >
                         삭제
@@ -192,14 +246,37 @@ function DetailPage() {
                 {addModalOpen && <div className={"modal"}> <StudentAdd setModalOpen={setAddModalOpen} campName={campName}/></div>}
                 {editModalOpen && <div className={"modal"}> <StudentEdit setModalOpen={setEditModalOpen} campName={campName} rowSelectionModel={rowSelectionModel}/></div>}
                 {pdfVisible && (
-                    <PDFViewer style={{ width: '100%', height: '500px' }}>
-                        <Pdf
-                            name={pdfData.name}
-                            studentId={pdfData.studentId}
-                            department={pdfData.department}
-                            campName={pdfData.campName}
-                        />
-                    </PDFViewer>
+                    <div>
+                        <PDFViewer style={{ width: '100%', height: '500px' , marginTop: '10px'}}>
+                            <Pdf
+                                name={pdfData.name}
+                                studentId={pdfData.studentId}
+                                department={pdfData.department}
+                                campName={pdfData.campName}
+                                year={pdfData.year}
+                                month={pdfData.month}
+                                day={pdfData.day}
+                            />
+                        </PDFViewer>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                            <Button
+                                variant="outlined"
+                                onClick={handleClosePdfView}
+                                sx={{
+                                    color: 'lightgrey',
+                                    border: 'none',
+                                    background: 'grey',
+                                    '&:hover': {
+                                        background: 'lightgrey',
+                                        border: 'none',
+                                        color: 'grey'// 변경 가능한 부분
+                                    },
+                                }}
+                            >
+                                미리보기 닫기
+                            </Button>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import CampAdd from "../component/CampAdd";
 import CampEdit from "../component/CampEdit";
+import '../styles/Button.css';
 
 function MainPage() {
     const [campList, setCampList] = useState([]);
@@ -76,20 +77,47 @@ function MainPage() {
                             <CardActions style={{justifyContent: 'flex-end', display: 'flex'}}>
                                 <Button
                                     variant="outlined"
-                                    sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                                    sx={{
+                                        color: 'lightgrey',
+                                        border: 'none',
+                                        background: 'grey',
+                                        '&:hover': {
+                                            background: 'lightgrey',
+                                            border: 'none',
+                                            color: 'grey'// 변경 가능한 부분
+                                        },
+                                    }}
                                     onClick={() => moveCamp(camp.campName, camp.startDate, camp.finishDate)}>
                                     상세보기
                                 </Button>
                                 <Button
                                     variant="outlined"
-                                    sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                                    sx={{
+                                        color: 'lightgrey',
+                                        border: 'none',
+                                        background: 'grey',
+                                        '&:hover': {
+                                            background: 'lightgrey',
+                                            border: 'none',
+                                            color: 'grey'// 변경 가능한 부분
+                                        },
+                                    }}
                                     onClick={() => showEditModal(camp.id)} // 수정 버튼 클릭 시 수정 모달 열기 함수 호출
                                 >
                                     수정
                                 </Button>
                                 <Button
                                     variant="outlined"
-                                    sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                                    sx={{
+                                        color: 'lightgrey',
+                                        border: 'none',
+                                        background: 'grey',
+                                        '&:hover': {
+                                            background: 'lightgrey',
+                                            border: 'none',
+                                            color: 'grey'// 변경 가능한 부분
+                                        },
+                                    }}
                                     onClick={() => deleteCamp(camp.id)}
                                 >
                                     삭제
@@ -101,7 +129,16 @@ function MainPage() {
                 <div style={{justifyContent: 'flex-end', display: 'flex', gap: '10px', marginTop: '10px' }}>
                     <Button
                         variant="outlined"
-                        sx={{ color: 'lightgrey', border: 'none', background: 'grey'}}
+                        sx={{
+                            color: 'lightgrey',
+                            border: 'none',
+                            background: 'grey',
+                            '&:hover': {
+                                background: 'lightgrey',
+                                border: 'none',
+                                color: 'grey'// 변경 가능한 부분
+                            },
+                        }}
                         onClick={showAddModal}
                     >
                         추가

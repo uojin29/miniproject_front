@@ -1,7 +1,7 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font , Image} from '@react-pdf/renderer';
 
-const Pdf = ({ name, studentId, department, campName, startDate, finishDate, font }) => {
+const Pdf = ({ name, studentId, department, campName, startDate, finishDate, font , year, month, day}) => {
     Font.register({ family: "MyFont", src: font });
 
     const styles = StyleSheet.create({
@@ -84,7 +84,7 @@ const Pdf = ({ name, studentId, department, campName, startDate, finishDate, fon
                             {'\n'}
                         </Text>
                         <Text>
-                            2023년 8월 4일{'\n'}{'\n'}
+                            {year}년 {month}월 {day}일{'\n'}{'\n'}
                         </Text>
                         <Text style={{fontSize: 20}}>
                             한동대학교 전산전자공학부 황  성  수{'\n'}
