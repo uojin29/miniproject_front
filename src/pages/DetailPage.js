@@ -113,6 +113,8 @@ function DetailPage() {
             studentId: studentId,
             department: department,
             campName: campName,
+            startDate: startDate,
+            finishDate: finishDate,
             year: year,
             month: month,
             day: day,
@@ -124,9 +126,26 @@ function DetailPage() {
         setPdfVisible(false);
     };
 
-    const handleDownloadClick = (name, campName, studentId) => {
-        const currentTime = new Date().toLocaleString();
-        console.log(currentTime, name, campName, studentId, "다운로드 됨");
+    // const handleDownloadClick = (name, campName, studentId) => {
+    //     const currentTime = new Date().toLocaleString();
+    //     console.log(currentTime, name, campName, studentId, "다운로드 됨");
+    // };
+
+    const handleDownloadClick = async (name, campName, studentId) => {
+        try {
+            const currentTime = new Date().toLocaleString();
+            console.log(currentTime, name, campName, studentId, '다운로드 됨');
+
+            // 프론트엔드에서 현재 시간을 백엔드로 전송
+            await axios.post('/api/saveTime', {
+                currentTime,
+                name,
+                campName,
+                studentId,
+            });
+        } catch (error) {
+            console.error('Error downloading:', error);
+        }
     };
 
     const showAddModal = () => {
@@ -253,6 +272,8 @@ function DetailPage() {
                                 studentId={pdfData.studentId}
                                 department={pdfData.department}
                                 campName={pdfData.campName}
+                                startDate={pdfData.startDate}
+                                finishDate={pdfData.finishDate}
                                 year={pdfData.year}
                                 month={pdfData.month}
                                 day={pdfData.day}
